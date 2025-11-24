@@ -3,7 +3,8 @@
 #include <SPI.h>
 #include <Network.h>
 #include <EthernetESP32.h>
-#include <WebServer.h>
+#include <AsyncTCP.h>
+//#include <WebServer.h>
 #include <LittleFS.h>
 #include <esp_now.h>
 #include <WiFi.h>
@@ -11,6 +12,7 @@
 #include <ATEMbase.h>
 #include <ATEMstd.h>
 
+#include <ESPAsyncWebServer.h>
 
 // Define the pin where the built-in RGB LED is connected
 #define LED_PIN 21
@@ -128,88 +130,8 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ
 
 int16_t ledVal = 0;
 
-WebServer server(80);
 
-// Webseiten von hier
-
-void handleRoot() {
-  Serial.println("HTTP-Server: Handle root");
-  server.send(200, "text/plain", "hello from esp32!");
-}
-
-void handleNotFound() {
-  Serial.println("HTTP-Server: Handle not found");
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-  server.send(404, "text/plain", message);
-}
-
-// Webseiten bis hier
-
-void handleHome() {
-
-  Serial.println("HTTP-Server: Handle Home");
-  String message = "\n";
-  message +=  "\n" ;
-  message += "<!doctype html> <html lang=\"en\"> <head> <meta charset=\"utf-8\"> ";
-  message += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">"; 
-  message += "<meta name=\"description\" content=\"\"> <meta name=\"author\" content=\"\">";
-  message += " <link rel=\"icon\" href=\"/docs/4.0/assets/img/favicons/favicon.ico\"> <title>Signin Template for Bootstrap</title> ";
-  message += "<link rel=\"canonical\" href=\"https://getbootstrap.com/docs/4.0/examples/sign-in/\"> <!-- Bootstrap core CSS --> ";
-  message += "<link href=\"bootstrap.min.css\" rel=\"stylesheet\">";
-  //message += " <!-- Custom styles for this template --> <link href=\"/signin.css\" rel=\"stylesheet\"> </head> ";
-  message += "<body class=\"text-center\"> <form class=\"form-signin\"> <!--<img class=\"mb-4\" src=\"https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg\" alt=\"\" width=\"72\" height=\"72\">-->";
-  message += " <h1 class=\"h3 mb-3 font-weight-normal\">MOP TALLY SYSTEM</h1>";
-  message += " <label for=\"inputPassword\" class=\"sr-only\">Password</label> <input type=\"password\" id=\"inputPassword\" class=\"form-control\" placeholder=\"Password\" required>";
-  message += " ";
-  message += " <button class=\"btn btn-lg btn-primary btn-block\" type=\"submit\">Sign in</button> <p class=\"mt-5 mb-3 text-muted\">&copy; 2025</p> </form> </body> </html>";
-  message += "\n";
-
-  server.send(200, "text/html", message);
-  
-}
-
-
-void handleCSSBootstrap(){
-
-
-
-  if(!LittleFS.begin(true)){
-    Serial.println("An Error has occurred while mounting LittleFS");
-    server.send(404, "text/plain", "An Error has occurred while mounting LittleFS");
-    return;
-  }
-  
-  File file = LittleFS.open("/bootstrap.min.css");
-  if(!file){
-    Serial.println("Failed to open file for reading");
-    server.send(404, "text/plain", "Failed to open file for reading");
-    return;
-  }
-  
-  Serial.println("HTTP-Server: Deliver CSS Bootstrap");
-  String message = "";
-  //while(file.available()){
-    message += file.readString();
-
-  //}
-  message +=  "\n" ;
-  Serial.println(message);
-  server.send(200, "text/css", message);
-  file.close();
-
-
-  
-}
+static AsyncWebServer server(80);
 
 
 void changeState(int newState){
@@ -257,6 +179,7 @@ if(!LittleFS.begin(true)){
     return;
   }
   
+  /*
   File file = LittleFS.open("/test.txt");
   if(!file){
     Serial.println("Failed to open file for reading");
@@ -268,6 +191,7 @@ if(!LittleFS.begin(true)){
     Serial.write(file.read());
   }
   file.close();
+  */
 
  
 
@@ -295,24 +219,9 @@ if(!LittleFS.begin(true)){
   Serial.print("IP Address: ");
   Serial.println(Ethernet.localIP());
 
-
-  server.on("/", handleHome);
-
-
-  server.on("/inline", []() {
-    Serial.println("HTTP-Server: Handle inline");
-    server.send(200, "text/plain", "this works as well");
-  });
-
-  server.on("/bootstrap.min.css", handleCSSBootstrap);
-  server.onNotFound(handleNotFound);
-
+  server.serveStatic("/assets", LittleFS, "/assets").setDefaultFile("test.txt");
+  server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
   server.begin();
-  Serial.println("HTTP server started");
-
-
-
-
 
   // Setup ESP NOW
     // Set device as a Wi-Fi Station
@@ -472,11 +381,6 @@ if(state == STATE_RUNNING){
 }
 
 }
-
-
-
-
-server.handleClient();
 
 loopLED();
 

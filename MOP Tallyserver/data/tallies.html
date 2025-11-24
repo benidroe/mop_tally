@@ -1,0 +1,39 @@
+
+
+<h4 class="mb-3">Tally settings</h4>
+          <form class="needs-validation" novalidate>
+
+            <h5 class="mb-3">LED Brightness</h5>
+
+            <div class="mb-3">
+                <label for="range-led" class="form-label">RGB LED</label>
+                <input type="range" class="form-control" id="range-led">
+            </div>
+
+            <div class="mb-3">
+                <label for="range-neopixel" class="form-label">Neopixel Matrix</label>
+                <input type="range" class="form-control" id="range-neopixel">
+            </div>
+
+        
+        
+            <hr class="mb-4">
+
+            <h5 class="mb-3">Input Mapping</h5>
+
+             <div class="mb-3">
+              <label for="swip">Mapping</label>
+               <div class="input-group"> <span class="input-group-text w-25">Tally</span>
+                <span class="input-group-text w-75">Switcher Input</span>
+                </div>
+              <div class="input-group"> <span class="input-group-text w-25">0x01</span>
+                <select class="form-select form-control" id="map0x01" required> <option value="1">Input 1</option> <option value="2">Input 2</option> </select>
+                </div>
+                <div class="input-group"> <span class="input-group-text w-25">0x02</span>
+                <select class="form-select form-control" id="map0x01" required> <option value="1">Input 1</option> <option value="2">Input 2</option> </select>
+                </div>
+            </div>
+            
+            <hr class="mb-4">
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Save</button>
+          </form>
