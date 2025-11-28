@@ -104,13 +104,131 @@
         } );
 
         $( "#nav_tallies" ).on( "click", function() {
-            $('#div_content').load('tallies.html');
-        } );
+            $('#div_content').load('tallies.html', function(responseTxt, statusTxt, xhr){
+              if(statusTxt == "success")
+                 $.getJSON("/tallies", ).done(function(data){
+                
+                  for (i = 1; i <= 12; i++){
+                    document.getElementById("mapx"+i).value = data[i-1];
+                  }
+          
+              });
+        } ); 
+      });
 
 
         $( "#nav_settings" ).on( "click", function() {
-            $('#div_content').load('settings.html');
-        } );
+            $('#div_content').load('settings.html', function(responseTxt, statusTxt, xhr){
+              if(statusTxt == "success")
+                 $.getJSON("/settings", ).done(function(data){
+                 document.getElementById("ip").value = data.ip;
+                 document.getElementById("sn").value = data.sn;
+                 document.getElementById("gw").value = data.gw;
+                 document.getElementById("swip").value = data.atemip;
+                 document.getElementById("ch").value = data.espch;
+      
+          
+              });
+
+              
+
+
+              if(statusTxt == "error")
+                alert("Error: " + xhr.status + ": " + xhr.statusText);
+            });
+          });
+
+
+            // submit form
+
+          $(document).on('submit', '#settingsform', function(){
+                event.preventDefault();                
+                var form = document.getElementById('settingsform');
+                var formData = new FormData(form);
+             
+                $.ajax({
+                    url: '/settings',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {                      
+                        alert('Your form has been sent successfully.');
+                    },
+                    error: function (xhr, status, error) {                       
+                        alert('Your form was not sent successfully.');
+                        console.error(error);
+                    }
+                });
+
+
+
+          });
+
+              // submit end
+
+              $(document).on('change', '#range-neopixel', function(){
+                brightness = this.value;
+                $.ajax({
+                    url: '/neopixel',
+                    method: 'POST',
+                    data: 'brightness='+brightness,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {                      
+                        // nothing
+                    },
+                    error: function (xhr, status, error) {                       
+                        alert('Your form was not sent successfully.');
+                        console.error(error);
+                    }
+                });
+              });
+
+
+               $(document).on('change', '#range-led', function(){
+                brightness = this.value;
+                $.ajax({
+                    url: '/led',
+                    method: 'POST',
+                    data: 'brightness='+brightness,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {                      
+                        // nothing
+                    },
+                    error: function (xhr, status, error) {                       
+                        alert('Your form was not sent successfully.');
+                        console.error(error);
+                    }
+                });
+              });
+
+
+
+               $(document).on('change', '.tallyrouter', function(){
+                var $current = $( this );
+                input = $current.val();
+                tally = $current.attr("attr_tally");
+                $.ajax({
+                    url: '/tallyroute',
+                    method: 'POST',
+                    data: 'input='+input+'&tally='+tally,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {                      
+                        // nothing
+                    },
+                    error: function (xhr, status, error) {                       
+                        alert('Your form was not sent successfully.');
+                        console.error(error);
+                    }
+                });
+              });
+            
+           
+
+  
     </script>
 
   </body>

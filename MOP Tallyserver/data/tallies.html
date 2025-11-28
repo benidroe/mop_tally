@@ -7,12 +7,12 @@
 
             <div class="mb-3">
                 <label for="range-led" class="form-label">RGB LED</label>
-                <input type="range" class="form-control" id="range-led">
+                <input type="range" class="form-control" id="range-led" min="0" max="100">
             </div>
 
             <div class="mb-3">
                 <label for="range-neopixel" class="form-label">Neopixel Matrix</label>
-                <input type="range" class="form-control" id="range-neopixel">
+                <input type="range" class="form-control" id="range-neopixel" min="0" max="100">
             </div>
 
         
@@ -27,13 +27,309 @@
                 <span class="input-group-text w-75">Switcher Input</span>
                 </div>
               <div class="input-group"> <span class="input-group-text w-25">0x01</span>
-                <select class="form-select form-control" id="map0x01" required> <option value="1">Input 1</option> <option value="2">Input 2</option> </select>
+                <select class="form-select form-control tallyrouter" id="mapx1" name="mapx1" attr_tally = "1" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
                 </div>
-                <div class="input-group"> <span class="input-group-text w-25">0x02</span>
-                <select class="form-select form-control" id="map0x01" required> <option value="1">Input 1</option> <option value="2">Input 2</option> </select>
+            
+
+            <div class="input-group"> <span class="input-group-text w-25">0x02</span>
+                <select class="form-select form-control tallyrouter" id="mapx2" name="mapx2" attr_tally = "2" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
+                </div>
+            
+          <div class="input-group"> <span class="input-group-text w-25">0x03</span>
+                <select class="form-select form-control tallyrouter" id="mapx3" name="mapx3" attr_tally = "3" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
+                </div>
+           
+              <div class="input-group"> <span class="input-group-text w-25">0x04</span>
+                <select class="form-select form-control tallyrouter" id="mapx4" name="mapx4" attr_tally = "4" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
+                </div>
+           
+
+
+                          <div class="input-group"> <span class="input-group-text w-25">0x05</span>
+                <select class="form-select form-control tallyrouter" id="mapx5" name="mapx5" attr_tally = "5" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
+                </div>
+          
+
+                          <div class="input-group"> <span class="input-group-text w-25">0x06</span>
+                <select class="form-select form-control tallyrouter" id="mapx6" name="mapx6" attr_tally = "6" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
+                </div>
+           
+
+
+                          <div class="input-group"> <span class="input-group-text w-25">0x07</span>
+                <select class="form-select form-control tallyrouter" id="mapx7" name="mapx7"  attr_tally = "7" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
+                </div>
+            
+
+
+                          <div class="input-group"> <span class="input-group-text w-25">0x08</span>
+                <select class="form-select form-control tallyrouter" id="mapx8" name="mapx8" attr_tally = "8" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
+                </div>
+           
+
+
+                          <div class="input-group"> <span class="input-group-text w-25">0x09</span>
+                <select class="form-select form-control tallyrouter" id="mapx9" name="mapx9" attr_tally = "9" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
+                </div>
+           
+
+
+
+                          <div class="input-group"> <span class="input-group-text w-25">0x0A</span>
+                <select class="form-select form-control tallyrouter" id="mapx10" name="mapx10" attr_tally = "10" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
+                </div>
+          
+
+                          <div class="input-group"> <span class="input-group-text w-25">0x0B</span>
+                <select class="form-select form-control tallyrouter" id="mapx11" name="mapx11" attr_tally = "11" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
+                </div>
+        
+
+                          <div class="input-group"> <span class="input-group-text w-25">0x0C</span>
+                <select class="form-select form-control tallyrouter" id="mapx12" name="mapx12" attr_tally = "12" required> 
+                  <option value="1">Input 1</option> 
+                  <option value="2">Input 2</option>
+                  <option value="3">Input 3</option>
+                  <option value="4">Input 4</option>
+                  <option value="5">Input 5</option>
+                  <option value="6">Input 6</option>
+                  <option value="7">Input 7</option>
+                  <option value="8">Input 8</option>
+                  <option value="9">Input 9</option>
+                  <option value="10">Input 10</option>
+                  <option value="11">Input 11</option>
+                  <option value="12">Input 12</option>
+                  <option value="13">Input 13</option>
+                  <option value="14">Input 14</option>
+                  <option value="15">Input 15</option>
+                  <option value="16">Input 16</option>
+                  <option value="17">Input 17</option>
+                  <option value="18">Input 18</option>
+                  <option value="19">Input 19</option>
+                  <option value="20">Input 20</option></select>
                 </div>
             </div>
-            
+
             <hr class="mb-4">
             <button class="btn btn-primary btn-lg btn-block" type="submit">Save</button>
           </form>

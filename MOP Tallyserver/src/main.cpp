@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <Adafruit_NeoPixel.h>
 #include <SPI.h>
 #include <Network.h>
@@ -13,6 +14,23 @@
 #include <ATEMstd.h>
 
 #include <ESPAsyncWebServer.h>
+#include <ArduinoJson.h>
+
+
+//Define struct for server settings
+struct Settings {
+    bool uninitialized;
+    bool staticIP;
+    IPAddress serverIP;
+    IPAddress serverSN;
+    IPAddress serverGW;
+    IPAddress switcherIP;
+    uint8_t pixelBrightness;
+    uint8_t ledBrightness;
+};
+
+Settings settings;
+
 
 // Define the pin where the built-in RGB LED is connected
 #define LED_PIN 21
@@ -110,6 +128,9 @@ void makeTallyRouting(int preview, uint32_t program){
 
   }
 
+  atemData.pixelBrightness = settings.pixelBrightness;
+  atemData.ledBrightness = settings.ledBrightness;
+
 
 }
 
@@ -139,7 +160,29 @@ void changeState(int newState){
 
 }
 
+void initSettings(){
+  settings.uninitialized = false;
+  settings.serverIP = IPAddress(192, 168,0, 110);
+  settings.serverGW = IPAddress(192,168,0,1);
+  settings.serverSN = IPAddress(255, 255, 255, 0);
+  settings.ledBrightness = LED_BRIGHTNESS;
+  settings.pixelBrightness = RGB_BRIGHTNESS;
+  Serial.println("Default settings recovered");
+
+}
+
+void saveSettings(){
+  EEPROM.put(0, settings);
+  EEPROM.commit();
+  Serial.println("Saved settings to EEPROM");
+}
+
 void setup() {
+
+
+
+ 
+
 
 
   // Predefine some Tally Routes
@@ -172,6 +215,32 @@ strip.show(); // Initialize all pixels to 'off'
 
 strip.setPixelColor(0, strip.Color(30 , 0, 0)); // Red
 strip.show();
+
+
+
+//Read settings from EEPROM. WIFI settings are stored separately by the ESP
+EEPROM.begin(sizeof(settings)); //Needed on ESP8266 module, as EEPROM lib works a bit differently than on a regular Arduino
+EEPROM.get(0, settings);
+
+
+if(settings.uninitialized){
+
+  // init settings
+  initSettings();
+  saveSettings();
+
+} 
+
+EEPROM.get(0, settings);
+
+Serial.println("read settings");
+//Ugly fix for IPAddress not loading correctly when read from EEPROM
+settings.serverIP = IPAddress(settings.serverIP[0], settings.serverIP[1], settings.serverIP[2], settings.serverIP[3]);
+settings.serverSN = IPAddress(settings.serverSN[0], settings.serverSN[1], settings.serverSN[2], settings.serverSN[3]);
+settings.serverGW = IPAddress(settings.serverGW[0], settings.serverGW[1], settings.serverGW[2], settings.serverGW[3]);
+settings.switcherIP = IPAddress(settings.switcherIP[0], settings.switcherIP[1], settings.switcherIP[2], settings.switcherIP[3]);
+Serial.println(settings.serverIP[0]);
+
 
 
 if(!LittleFS.begin(true)){
@@ -207,7 +276,7 @@ if(!LittleFS.begin(true)){
   Ethernet.init(driver);
     
   // Initialize Ethernet with static IP settings
-  Ethernet.begin(mac, ip, dns, gateway, subnet);
+  Ethernet.begin(mac, settings.serverIP, dns, settings.serverGW, settings.serverSN);
 
   // Verify if IP address is properly assigned
   if (Ethernet.localIP() == IPAddress(0, 0, 0, 0)) {
@@ -221,6 +290,150 @@ if(!LittleFS.begin(true)){
 
   server.serveStatic("/assets", LittleFS, "/assets").setDefaultFile("test.txt");
   server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
+  
+
+   server.on("/settings", HTTP_GET, [](AsyncWebServerRequest *request) {
+    JsonDocument doc;
+    JsonObject root = doc.to<JsonObject>();
+    root["ip"] = settings.serverIP.toString();
+    root["sn"] = settings.serverSN.toString();
+    root["gw"] = settings.serverGW.toString();
+
+    root["atemip"] = settings.switcherIP.toString();
+    root["espch"] = "6";
+  
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    serializeJson(root, *response);
+
+    request->send(response);
+
+ 
+  });
+
+
+
+     server.on("/tallies", HTTP_GET, [](AsyncWebServerRequest *request) {
+    JsonDocument doc;
+    JsonObject root = doc.to<JsonObject>();
+
+
+    JsonArray inputs = doc.to<JsonArray>();
+
+    for(int i = 1; i <= 0x1F; i++){
+      inputs.add(tallyRouting[i]);
+    }
+    root["inputs"] = inputs;
+  
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    serializeJson(root, *response);
+
+    request->send(response);
+
+ 
+  });
+
+    server.on("/settings", HTTP_POST, [](AsyncWebServerRequest *request) {
+    
+    /*
+      // display params
+    size_t count = request->params();
+    for (size_t i = 0; i < count; i++) {
+      const AsyncWebParameter *p = request->getParam(i);
+      Serial.printf("PARAM[%u]: %s = %s\n", i, p->name().c_str(), p->value().c_str());
+    }
+    */
+    // get who param
+    String newip;
+    if (request->hasParam("ip", true)) {
+      newip = request->getParam("ip", true)->value();
+      settings.serverIP.fromString(newip);
+      Serial.println(newip);
+    } 
+
+    if (request->hasParam("sn", true)) {
+      newip = request->getParam("sn", true)->value();
+      settings.serverSN.fromString(newip);
+      Serial.println(newip);
+    } 
+
+    if (request->hasParam("gw", true)) {
+      newip = request->getParam("gw", true)->value();
+      settings.serverGW.fromString(newip);
+      Serial.println(newip);
+    } 
+
+
+    if (request->hasParam("ch", true)) {
+      //channel = request->getParam("ch", true)->value();
+      // todo settings..fromString(newip);
+     // Serial.println(newip);
+    } 
+
+    if(request->hasParam("swip", true)) {
+        newip = request->getParam("swip", true)->value();
+        settings.switcherIP.fromString(newip);
+        Serial.println(newip);
+      } 
+
+      saveSettings();
+
+      
+
+    request->send(200, "text/plain", "success");
+
+    delay(100);
+    ESP.restart();
+  });
+
+
+
+  server.on("/neopixel", HTTP_POST, [](AsyncWebServerRequest *request) {
+
+  if (request->hasParam("brightness", true)) {
+      String brightness= request->getParam("brightness", true)->value();
+      settings.pixelBrightness = brightness.toInt();
+      Serial.print("neopixel brightness updated: ");
+      Serial.println(settings.pixelBrightness);
+    } 
+
+    request->send(200, "text/plain", "success");
+   
+
+
+  });
+ 
+  server.on("/led", HTTP_POST, [](AsyncWebServerRequest *request) {
+
+  if (request->hasParam("brightness", true)) {
+      String brightness= request->getParam("brightness", true)->value();
+      settings.ledBrightness = brightness.toInt();
+      Serial.print("led brightness updated: ");
+      Serial.println(settings.ledBrightness);
+    } 
+
+    request->send(200, "text/plain", "success");
+   
+
+
+  });
+
+
+    server.on("/tallyroute", HTTP_POST, [](AsyncWebServerRequest *request) {
+
+  if (request->hasParam("input", true) && request->hasParam("tally", true)) {
+      String tally= request->getParam("tally", true)->value();
+      String input= request->getParam("input", true)->value();
+      tallyRouting[tally.toInt()] = input.toInt();
+    } 
+
+    request->send(200, "text/plain", "success");
+   
+
+
+  });
+
+
+
   server.begin();
 
   // Setup ESP NOW
@@ -291,7 +504,7 @@ void loopLED(){
 
 void loop() {
 
-  Serial.println(state);
+//Serial.println(state);
 
 if (Ethernet.hasIP()){
     if(state == STATE_OFFLINE){
@@ -309,8 +522,8 @@ Serial.println("Ethernet is ONLINE 1234!");
   if(switcherFirstRun){
       // Initialize a connection to the ATEM switcher:
     Serial.println("Connecting to switcher...........");
-    AtemSwitcher.begin(switcherIp);
-    AtemSwitcher.serialOutput(0x80);
+    AtemSwitcher.begin(settings.switcherIP);
+    //AtemSwitcher.serialOutput(0x80);
     //AtemSwitcher.connect();
     switcherFirstRun = false;
 
@@ -336,7 +549,7 @@ if (state == STATE_SWITCHER_CONNECTING){
 if(state == STATE_RUNNING){
 
 
-   Serial.println("AtemSwitcher run loop");
+  //Serial.println("AtemSwitcher run loop");
   AtemSwitcher.runLoop();
 
   if (!AtemSwitcher.isConnected()) {
@@ -354,8 +567,8 @@ if(state == STATE_RUNNING){
   uint32_t atsn = AtemSwitcher.getTallyByFlag(TALLY_FLAG_TRANSITION_NEXT);
   // XOR aus PROGRAM und NEXT gibt die Tallys, die wirklich auf PGM sein sollen
   uint32_t arealpgm = apgm ^ atsn ;
-  Serial.println("The Real Program: ");
-  printBinary(arealpgm);
+  //Serial.println("The Real Program: ");
+  //printBinary(arealpgm);
   //Serial.print(AtemSwitcher.getTallyByIndexTallyFlags(1));
 
   //Serial.print("ATEM sagt grad: ");
@@ -373,7 +586,7 @@ if(state == STATE_RUNNING){
   esp_err_t result = esp_now_send(wifi_broadcastAddress, (uint8_t *) &atemData, sizeof(atemData));
     
   if (result == ESP_OK) {
-    Serial.println("Sent with success");
+    //Serial.println("Sent with success");
   }
   else {
     Serial.println("Error sending the data");
