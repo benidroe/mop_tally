@@ -25,20 +25,27 @@ struct Settings {
     IPAddress serverSN;
     IPAddress serverGW;
     IPAddress switcherIP;
-    uint8_t pixelBrightness;
-    uint8_t ledBrightness;
+    
 };
 
 Settings settings;
 
+
+struct TallySettings {
+  bool uninitialized;
+  uint8_t routing[0x1F];
+  uint8_t pixelBrightness;
+  uint8_t ledBrightness;
+
+};
+
+TallySettings tallySettings;
 
 // Define the pin where the built-in RGB LED is connected
 #define LED_PIN 21
 
 // Define the number of LEDs in the strip (usually 1 for built-in LED)
 #define NUM_LEDS 1
-
-#define LED_BRIGHTNESS 40
 
 
 // W5500 Pin Definitions
@@ -88,11 +95,6 @@ bool switcherFirstRun = true;
 // REPLACE WITH THE RECEIVER'S MAC Address
 uint8_t wifi_broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xBD, 0xFD};
 
-int tallyRouting[0x1F] = {};  // Tally Routing - Tally-Adresse ---> ATEM Input
-
-
-
-
 typedef struct struct_wifi_message {
     int id; // must be unique for each sender board
     int pixelBrightness;
@@ -110,7 +112,7 @@ void makeTallyRouting(int preview, uint32_t program){
 
   for (int i = 0x00; i <= 0x1F; i++){
 
-    int tallynumber = tallyRouting[i];
+    int tallynumber = tallySettings.routing[i];
     if (preview == tallynumber){
       atemData.tallyPreview[i] = 1;
     } else {
@@ -128,8 +130,8 @@ void makeTallyRouting(int preview, uint32_t program){
 
   }
 
-  atemData.pixelBrightness = settings.pixelBrightness;
-  atemData.ledBrightness = settings.ledBrightness;
+  atemData.pixelBrightness = tallySettings.pixelBrightness;
+  atemData.ledBrightness = tallySettings.ledBrightness;
 
 
 }
@@ -161,12 +163,26 @@ void changeState(int newState){
 }
 
 void initSettings(){
-  settings.uninitialized = false;
+  
   settings.serverIP = IPAddress(192, 168,0, 110);
   settings.serverGW = IPAddress(192,168,0,1);
   settings.serverSN = IPAddress(255, 255, 255, 0);
-  settings.ledBrightness = LED_BRIGHTNESS;
-  settings.pixelBrightness = RGB_BRIGHTNESS;
+  settings.uninitialized = false;
+  
+  
+  // Predefine some Tally Routes
+  // [Hardware-Adress] = Input Number:
+  
+  for(int i = 0x01; i <= 0x1F; i++){
+    tallySettings.routing[i] = i;
+  }
+  tallySettings.ledBrightness = 40;
+  tallySettings.pixelBrightness = 40;
+  tallySettings.uninitialized = false;
+
+
+
+
   Serial.println("Default settings recovered");
 
 }
@@ -177,28 +193,47 @@ void saveSettings(){
   Serial.println("Saved settings to EEPROM");
 }
 
+void readSettings(){
+
+EEPROM.get(0, settings);
+
+  //Ugly fix for IPAddress not loading correctly when read from EEPROM
+settings.serverIP = IPAddress(settings.serverIP[0], settings.serverIP[1], settings.serverIP[2], settings.serverIP[3]);
+settings.serverSN = IPAddress(settings.serverSN[0], settings.serverSN[1], settings.serverSN[2], settings.serverSN[3]);
+settings.serverGW = IPAddress(settings.serverGW[0], settings.serverGW[1], settings.serverGW[2], settings.serverGW[3]);
+settings.switcherIP = IPAddress(settings.switcherIP[0], settings.switcherIP[1], settings.switcherIP[2], settings.switcherIP[3]);
+
+
+}
+
+void saveTallySettings(){
+  EEPROM.put(120, settings);
+
+    int addressIndex = 150;
+    for (int i = 1; i <= sizeof(tallySettings); i++) 
+    {
+      EEPROM.write(addressIndex, tallySettings.routing[i]);
+      addressIndex += 1;
+    }
+
+
+  EEPROM.commit();
+  Serial.println("Saved tallysettings to EEPROM");
+}
+
+void readTallySettings(){
+
+  EEPROM.get(120, tallySettings);
+  int addressIndex = 150;
+  for (int i = 1; i <= sizeof(tallySettings); i++) 
+  {
+    tallySettings.routing[i] = EEPROM.read(addressIndex);
+    addressIndex += 1;
+  }
+}
+
 void setup() {
 
-
-
- 
-
-
-
-  // Predefine some Tally Routes
-  // [Hardware-Adress] = Input Number:
-  tallyRouting[0x01] = 1;
-  tallyRouting[0x02] = 2;
-  tallyRouting[0x03] = 3;
-  tallyRouting[0x04] = 4;
-  tallyRouting[0x05] = 5;
-  tallyRouting[0x06] = 6;
-  tallyRouting[0x07] = 7;
-  tallyRouting[0x08] = 8;
-  tallyRouting[0x09] = 9;
-  tallyRouting[0x0A] = 10;
-  tallyRouting[0x0B] = 11;
-  tallyRouting[0x0C] = 12;
 
   changeState(STATE_OFFLINE);
 
@@ -219,30 +254,30 @@ strip.show();
 
 
 //Read settings from EEPROM. WIFI settings are stored separately by the ESP
-EEPROM.begin(sizeof(settings)); //Needed on ESP8266 module, as EEPROM lib works a bit differently than on a regular Arduino
-EEPROM.get(0, settings);
+EEPROM.begin(300); // Size is 200...
 
+//EEPROM.get(0, settings);
+readSettings();
+readTallySettings();
 
-if(settings.uninitialized){
+if(settings.uninitialized || tallySettings.uninitialized){
 
+  Serial.println("initialize tally settings");
   // init settings
   initSettings();
   saveSettings();
+  saveTallySettings();
+  readSettings();
+  readTallySettings();
 
 } 
 
-EEPROM.get(0, settings);
 
 Serial.println("read settings");
-//Ugly fix for IPAddress not loading correctly when read from EEPROM
-settings.serverIP = IPAddress(settings.serverIP[0], settings.serverIP[1], settings.serverIP[2], settings.serverIP[3]);
-settings.serverSN = IPAddress(settings.serverSN[0], settings.serverSN[1], settings.serverSN[2], settings.serverSN[3]);
-settings.serverGW = IPAddress(settings.serverGW[0], settings.serverGW[1], settings.serverGW[2], settings.serverGW[3]);
-settings.switcherIP = IPAddress(settings.switcherIP[0], settings.switcherIP[1], settings.switcherIP[2], settings.switcherIP[3]);
-Serial.println(settings.serverIP[0]);
 
 
-
+Serial.println("read tally settings");
+readTallySettings();
 if(!LittleFS.begin(true)){
     Serial.println("An Error has occurred while mounting LittleFS");
     return;
@@ -320,7 +355,7 @@ if(!LittleFS.begin(true)){
     JsonArray inputs = doc.to<JsonArray>();
 
     for(int i = 1; i <= 0x1F; i++){
-      inputs.add(tallyRouting[i]);
+      inputs.add(tallySettings.routing[i]);
     }
     root["inputs"] = inputs;
   
@@ -387,51 +422,70 @@ if(!LittleFS.begin(true)){
 
 
 
-  server.on("/neopixel", HTTP_POST, [](AsyncWebServerRequest *request) {
 
-  if (request->hasParam("brightness", true)) {
-      String brightness= request->getParam("brightness", true)->value();
-      settings.pixelBrightness = brightness.toInt();
-      Serial.print("neopixel brightness updated: ");
-      Serial.println(settings.pixelBrightness);
-    } 
+      server.on("/brightness", HTTP_GET, [](AsyncWebServerRequest *request) {
+        JsonDocument doc;
+        JsonObject root = doc.to<JsonObject>();
+        root["led"] = tallySettings.ledBrightness;
+        root["neopixel"] = tallySettings.pixelBrightness;
+      
+        AsyncResponseStream *response = request->beginResponseStream("application/json");
+        serializeJson(root, *response);
 
-    request->send(200, "text/plain", "success");
-   
+        request->send(response);
+
+    
+      });
 
 
-  });
+
+
+      server.on("/neopixel", HTTP_POST, [](AsyncWebServerRequest *request) {
+        if (request->hasParam("brightness", true)) {
+            String brightness= request->getParam("brightness", true)->value();
+            tallySettings.pixelBrightness = brightness.toInt();
+            Serial.print("neopixel brightness updated: ");
+            Serial.println(tallySettings.pixelBrightness);
+        } 
+
+        request->send(200, "text/plain", "success");
+      });
  
-  server.on("/led", HTTP_POST, [](AsyncWebServerRequest *request) {
+      server.on("/led", HTTP_POST, [](AsyncWebServerRequest *request) {
+        if (request->hasParam("brightness", true)) {
+            String brightness= request->getParam("brightness", true)->value();
+            tallySettings.ledBrightness = brightness.toInt();
+            Serial.print("led brightness updated: ");
+            Serial.println(tallySettings.ledBrightness);
+          } 
 
-  if (request->hasParam("brightness", true)) {
-      String brightness= request->getParam("brightness", true)->value();
-      settings.ledBrightness = brightness.toInt();
-      Serial.print("led brightness updated: ");
-      Serial.println(settings.ledBrightness);
-    } 
-
-    request->send(200, "text/plain", "success");
-   
-
-
-  });
+        request->send(200, "text/plain", "success");
+      });
 
 
     server.on("/tallyroute", HTTP_POST, [](AsyncWebServerRequest *request) {
 
-  if (request->hasParam("input", true) && request->hasParam("tally", true)) {
-      String tally= request->getParam("tally", true)->value();
-      String input= request->getParam("input", true)->value();
-      tallyRouting[tally.toInt()] = input.toInt();
-    } 
-
-    request->send(200, "text/plain", "success");
+      if (request->hasParam("input", true) && request->hasParam("tally", true)) {
+          String tally= request->getParam("tally", true)->value();
+          String input= request->getParam("input", true)->value();
+          if(tally.toInt() <= 0x1F && input.toInt() <= 20 ){ // check if input value is valid
+            tallySettings.routing[tally.toInt()] = input.toInt();
+          }
+          
+      } 
+      request->send(200, "text/plain", "success");
    
+    });
 
 
-  });
+    server.on("/tallysave", HTTP_POST, [](AsyncWebServerRequest *request) {
 
+      if (request->hasParam("save", true)) {
+        saveTallySettings();
+      } 
+      request->send(200, "text/plain", "success");
+   
+    });
 
 
   server.begin();
@@ -577,8 +631,8 @@ if(state == STATE_RUNNING){
   //Serial.print("\n");
 
   atemData.id = 1;
-  atemData.ledBrightness = 20;
-  atemData.pixelBrightness = 20;
+  atemData.ledBrightness = tallySettings.ledBrightness;
+  atemData.pixelBrightness = tallySettings.ledBrightness;
   makeTallyRouting(PreviewTally, arealpgm);
 
 

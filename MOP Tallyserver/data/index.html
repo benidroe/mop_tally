@@ -113,6 +113,12 @@
                   }
           
               });
+              $.getJSON("/brightness", ).done(function(data){
+                document.getElementById("range-led").value = data.led;
+                document.getElementById("range-neopixel").value = data.neopixel;
+                
+              });
+
         } ); 
       });
 
@@ -153,7 +159,7 @@
                     processData: false,
                     contentType: false,
                     success: function (response) {                      
-                        alert('Your form has been sent successfully.');
+                        alert('Settings saved successfully. Devie reboot.');
                     },
                     error: function (xhr, status, error) {                       
                         alert('Your form was not sent successfully.');
@@ -225,6 +231,29 @@
                     }
                 });
               });
+
+
+
+              $(document).on('click', '#tallysave', function(){
+                event.preventDefault();                             
+                $.ajax({
+                    url: '/tallysave',
+                    method: 'POST',
+                    data: 'save=true',
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {                      
+                        //alert('Your form has been sent successfully.');
+                    },
+                    error: function (xhr, status, error) {                       
+                        alert('Your form was not sent successfully.');
+                        console.error(error);
+                    }
+                });
+
+
+
+          });
             
            
 
