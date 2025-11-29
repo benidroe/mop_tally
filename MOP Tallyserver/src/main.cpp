@@ -136,7 +136,6 @@ void makeTallyRouting(int preview, uint32_t program){
 
 }
 
-
 // Create peer interface
 esp_now_peer_info_t peerInfo;
 
@@ -155,6 +154,25 @@ int16_t ledVal = 0;
 
 
 static AsyncWebServer server(80);
+// create websocket handler
+static AsyncWebSocketMessageHandler wsHandler;
+// add it to the websocket server
+static AsyncWebSocket ws("/ws", wsHandler.eventHandler());
+
+void updateWebsocket(){
+
+  JsonDocument doc;
+
+  JsonArray array1 = doc.createNestedArray("preview");
+  JsonArray array2 = doc.createNestedArray("program");
+  copyArray(atemData.tallyPreview, array1);
+  copyArray(atemData.tallyProgram, array2);
+
+  char output[512];
+  serializeJson(doc, output);
+  ws.printfAll(output);
+}
+
 
 
 void changeState(int newState){
@@ -487,6 +505,33 @@ if(!LittleFS.begin(true)){
    
     });
 
+    // Websocket from here
+
+
+
+    wsHandler.onConnect([](AsyncWebSocket *server, AsyncWebSocketClient *client) {
+      // do nothing
+    });
+
+    wsHandler.onDisconnect([](AsyncWebSocket *server, uint32_t clientId) {
+      // do nothing
+    });
+
+    wsHandler.onError([](AsyncWebSocket *server, AsyncWebSocketClient *client, uint16_t errorCode, const char *reason, size_t len) {
+      // do nothing
+    });
+
+    wsHandler.onMessage([](AsyncWebSocket *server, AsyncWebSocketClient *client, const uint8_t *data, size_t len) {
+      // do nothing
+    });
+
+    wsHandler.onFragment([](AsyncWebSocket *server, AsyncWebSocketClient *client, const AwsFrameInfo *frameInfo, const uint8_t *data, size_t len) {
+      // do nothing
+    });
+
+  server.addHandler(&ws);
+
+    // Websocket until here
 
   server.begin();
 
@@ -555,6 +600,20 @@ void loopLED(){
   strip.show();
   ledVal++;
 }
+
+static uint32_t lastWS = 0;
+static uint32_t deltaWS = 2000;
+
+void loopWebsocket(){
+  uint32_t now = millis();
+
+  if (now - lastWS >= deltaWS) {
+    ws.cleanupClients();
+    lastWS = millis();
+  }
+}
+
+
 
 void loop() {
 
@@ -639,6 +698,10 @@ if(state == STATE_RUNNING){
   // Send message via ESP-NOW
   esp_err_t result = esp_now_send(wifi_broadcastAddress, (uint8_t *) &atemData, sizeof(atemData));
     
+
+  // update websocket
+  updateWebsocket();
+
   if (result == ESP_OK) {
     //Serial.println("Sent with success");
   }
@@ -646,6 +709,8 @@ if(state == STATE_RUNNING){
     Serial.println("Error sending the data");
   }
 }
+
+loopWebsocket();
 
 }
 

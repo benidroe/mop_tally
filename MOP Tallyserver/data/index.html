@@ -55,31 +55,106 @@
         <div class="col-md-4 order-md-2 mb-4">
           <h4 class="d-flex justify-content-between align-items-center mb-3">
             <span class="text-muted">Tallies available</span>
-            <span class="badge badge-secondary badge-pill">3</span>
+            <span class="badge badge-secondary badge-pill">12</span>
           </h4>
           <ul class="list-group mb-3">
-            <li class="list-group-item d-flex justify-content-between lh-condensed list-group-item-danger">
+            <li class="list-group-item d-flex justify-content-between lh-condensed" id="vtally1">
               <div>
                 <h6 class="my-0">Tally 0x01</h6>
-                <small class="text-muted">Program</small>
+                <small class="text-muted" id="vtallytxt1">-</small>
               </div>
               <span class="text-muted">-48db</span>
             </li>
-            <li class="list-group-item d-flex justify-content-between lh-condensed">
+            <li class="list-group-item d-flex justify-content-between lh-condensed" id="vtally2">
               <div>
                 <h6 class="my-0">Tally 0x02</h6>
-                <small class="text-muted">-</small>
+                <small class="text-muted" id="vtallytxt2">-</small>
               </div>
               <span class="text-muted">-38db</span>
             </li>
-            <li class="list-group-item d-flex justify-content-between lh-condensed list-group-item-success">
+            <li class="list-group-item d-flex justify-content-between lh-condensed" id="vtally3">
               <div>
                 <h6 class="my-0">Tally 0x03</h6>
-                <small class="text-muted">Preview</small>
+                <small class="text-muted" id="vtallytxt3">-</small>
               </div>
               <span class="text-muted">-32db</span>
             </li>
             
+            <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally4">
+              <div>
+                <h6 class="my-0">Tally 0x04</h6>
+                <small class="text-muted" id="vtallytxt4">-</small>
+              </div>
+              <span class="text-muted">-32db</span>
+            </li>
+
+            <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally5">
+              <div>
+                <h6 class="my-0">Tally 0x05</h6>
+                <small class="text-muted" id="vtallytxt5">-</small>
+              </div>
+              <span class="text-muted">-32db</span>
+            </li>
+
+            <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally6">
+              <div>
+                <h6 class="my-0">Tally 0x06</h6>
+                <small class="text-muted" id="vtallytxt6">-</small>
+              </div>
+              <span class="text-muted">-32db</span>
+            </li>
+
+            <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally7">
+              <div>
+                <h6 class="my-0">Tally 0x07</h6>
+                <small class="text-muted" id="vtallytxt7">-</small>
+              </div>
+              <span class="text-muted">-32db</span>
+            </li>
+
+            <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally8">
+              <div>
+                <h6 class="my-0">Tally 0x08</h6>
+                <small class="text-muted" id="vtallytxt8">-</small>
+              </div>
+              <span class="text-muted">-32db</span>
+            </li>
+
+            <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally9">
+              <div>
+                <h6 class="my-0">Tally 0x09</h6>
+                <small class="text-muted" id="vtallytxt9">-</small>
+              </div>
+              <span class="text-muted">-32db</span>
+            </li>
+
+            <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally10">
+              <div>
+                <h6 class="my-0">Tally 0x0A</h6>
+                <small class="text-muted" id="vtallytxt10">-</small>
+              </div>
+              <span class="text-muted">-32db</span>
+            </li>
+
+            <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally11">
+              <div>
+                <h6 class="my-0">Tally 0x0B</h6>
+                <small class="text-muted" id="vtallytxt11">-</small>
+              </div>
+              <span class="text-muted">-32db</span>
+            </li>
+
+            <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally12">
+              <div>
+                <h6 class="my-0">Tally 0x0C</h6>
+                <small class="text-muted" id="vtallytxt12">-</small>
+              </div>
+              <span class="text-muted">-32db</span>
+            </li>
+
+          
+            
+
           </ul>
         </div>
         <div class="col-md-8 order-md-1" id="div_content">
@@ -98,6 +173,31 @@
 
     <script src="assets/jquery-3.7.1.js"></script>
     <script>
+
+      var ws = new WebSocket('ws://192.168.0.110/ws');
+    ws.onopen = function() {
+      console.log("WebSocket connected");
+    };
+    ws.onmessage = function(event) {
+      var obj = jQuery.parseJSON( event.data);
+      var pwv = obj.preview;
+      var pgm = obj.program;
+      for(i = 1; i <= 12; i++){
+        $("#vtally"+i).removeClass("list-group-item-danger");
+        $("#vtally"+i).removeClass("list-group-item-success");
+        $("#vtallytxt"+i).html("-");
+        if(pwv[i] == true){
+           $("#vtally"+i).addClass("list-group-item-success");
+           $("#vtallytxt"+i).html("preview");
+        }
+        if(pgm[i] == true){
+           $("#vtally"+i).addClass("list-group-item-danger");
+           $("#vtallytxt"+i).html("program");
+        }
+        
+      }
+
+    };
 
         $( "#nav_dashboard" ).on( "click", function() {
             $('#div_content').load('dashboard.html');
