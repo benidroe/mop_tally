@@ -63,21 +63,21 @@
                 <h6 class="my-0">Tally 0x01</h6>
                 <small class="text-muted" id="vtallytxt1">-</small>
               </div>
-              <span class="text-muted">-48db</span>
+              <span class="text-muted">-</span>
             </li>
             <li class="list-group-item d-flex justify-content-between lh-condensed" id="vtally2">
               <div>
                 <h6 class="my-0">Tally 0x02</h6>
                 <small class="text-muted" id="vtallytxt2">-</small>
               </div>
-              <span class="text-muted">-38db</span>
+              <span class="text-muted">-</span>
             </li>
             <li class="list-group-item d-flex justify-content-between lh-condensed" id="vtally3">
               <div>
                 <h6 class="my-0">Tally 0x03</h6>
                 <small class="text-muted" id="vtallytxt3">-</small>
               </div>
-              <span class="text-muted">-32db</span>
+              <span class="text-muted">-</span>
             </li>
             
             <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally4">
@@ -85,7 +85,7 @@
                 <h6 class="my-0">Tally 0x04</h6>
                 <small class="text-muted" id="vtallytxt4">-</small>
               </div>
-              <span class="text-muted">-32db</span>
+              <span class="text-muted">-</span>
             </li>
 
             <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally5">
@@ -93,7 +93,7 @@
                 <h6 class="my-0">Tally 0x05</h6>
                 <small class="text-muted" id="vtallytxt5">-</small>
               </div>
-              <span class="text-muted">-32db</span>
+              <span class="text-muted">-</span>
             </li>
 
             <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally6">
@@ -101,7 +101,7 @@
                 <h6 class="my-0">Tally 0x06</h6>
                 <small class="text-muted" id="vtallytxt6">-</small>
               </div>
-              <span class="text-muted">-32db</span>
+              <span class="text-muted">-</span>
             </li>
 
             <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally7">
@@ -109,7 +109,7 @@
                 <h6 class="my-0">Tally 0x07</h6>
                 <small class="text-muted" id="vtallytxt7">-</small>
               </div>
-              <span class="text-muted">-32db</span>
+              <span class="text-muted">-</span>
             </li>
 
             <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally8">
@@ -117,7 +117,7 @@
                 <h6 class="my-0">Tally 0x08</h6>
                 <small class="text-muted" id="vtallytxt8">-</small>
               </div>
-              <span class="text-muted">-32db</span>
+              <span class="text-muted">-</span>
             </li>
 
             <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally9">
@@ -125,7 +125,7 @@
                 <h6 class="my-0">Tally 0x09</h6>
                 <small class="text-muted" id="vtallytxt9">-</small>
               </div>
-              <span class="text-muted">-32db</span>
+              <span class="text-muted">-</span>
             </li>
 
             <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally10">
@@ -133,7 +133,7 @@
                 <h6 class="my-0">Tally 0x0A</h6>
                 <small class="text-muted" id="vtallytxt10">-</small>
               </div>
-              <span class="text-muted">-32db</span>
+              <span class="text-muted">-</span>
             </li>
 
             <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally11">
@@ -141,7 +141,7 @@
                 <h6 class="my-0">Tally 0x0B</h6>
                 <small class="text-muted" id="vtallytxt11">-</small>
               </div>
-              <span class="text-muted">-32db</span>
+              <span class="text-muted">-</span>
             </li>
 
             <li class="list-group-item d-flex justify-content-between lh-condensed " id="vtally12">
@@ -149,7 +149,7 @@
                 <h6 class="my-0">Tally 0x0C</h6>
                 <small class="text-muted" id="vtallytxt12">-</small>
               </div>
-              <span class="text-muted">-32db</span>
+              <span class="text-muted">-</span>
             </li>
 
           
@@ -251,6 +251,12 @@
                 event.preventDefault();                
                 var form = document.getElementById('settingsform');
                 var formData = new FormData(form);
+
+                setTimeout(
+                    function() 
+                    {
+                      location.reload();
+                    }, 1000);
              
                 $.ajax({
                     url: '/settings',
@@ -258,16 +264,9 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function (response) {                      
-                        alert('Settings saved successfully. Devie reboot.');
-                    },
-                    error: function (xhr, status, error) {                       
-                        alert('Your form was not sent successfully.');
-                        console.error(error);
-                    }
+                    
                 });
-
-
+            
 
           });
 

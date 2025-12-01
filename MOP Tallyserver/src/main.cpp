@@ -48,6 +48,11 @@ TallySettings tallySettings;
 #define NUM_LEDS 1
 
 
+// Define pin where Reset-Button is connected
+#define RESET_PIN 17
+#define RESET_BUTTON_AVAILABLE true
+int counter_reset_press = 0;
+
 // W5500 Pin Definitions
 #define W5500_CS     14  // Chip Select pin
 #define W5500_RST     9  // Reset pin (optional, not used here)
@@ -250,6 +255,57 @@ void readTallySettings(){
   }
 }
 
+void initializeAllSettings(){
+  initSettings();
+  saveSettings();
+  saveTallySettings();
+  readSettings();
+  readTallySettings();
+}
+
+void evaluateResetPin()
+{
+  bool stateResetPin = digitalRead(RESET_PIN);
+  if(!stateResetPin && RESET_BUTTON_AVAILABLE){
+    counter_reset_press++;
+    Serial.println("Increase reset press");
+  }
+
+  // Set a hint on RGB-LED, that RESET Button is pressed long enough
+  if(counter_reset_press > 50){
+      strip.setPixelColor(0, strip.Color(0, 10, 10)); // cyan
+      strip.show();
+  }
+
+  // initialize all Settings if Reset-PIN was pressed for more than 5 seconds and released
+  if(counter_reset_press > 50 && stateResetPin){
+    Serial.println("Reached init action");
+
+    // let the led blink
+    for(int i = 0; i < 10; i++){
+      if(i % 2 == 1){   // switch between odd and even
+      strip.setPixelColor(0, strip.Color(0, 25, 25)); // cyan
+      }
+      else {
+        strip.setPixelColor(0, strip.Color(25 , 0, 0)); // red
+      }
+      strip.show();
+      delay(200);
+    }
+
+    // Reset EEPROM
+    initializeAllSettings();
+    counter_reset_press = 0;
+    Serial.println("SOFT-RESET initialized by RESET-PIN done!");
+    Serial.println("ESP restart...");
+    ESP.restart();
+  }
+
+  if(stateResetPin && RESET_BUTTON_AVAILABLE) {
+    counter_reset_press = 0;
+  }
+}
+
 void setup() {
 
 
@@ -269,24 +325,29 @@ strip.show(); // Initialize all pixels to 'off'
 strip.setPixelColor(0, strip.Color(30 , 0, 0)); // Red
 strip.show();
 
-
+rmtDeinit(RESET_PIN);
+pinMode(RESET_PIN, INPUT);
 
 //Read settings from EEPROM. WIFI settings are stored separately by the ESP
 EEPROM.begin(300); // Size is 200...
+
+//Reset and initialize EEProm if SOFT-RESET-BUTTON is pressed
+while(!digitalRead(RESET_PIN) && RESET_BUTTON_AVAILABLE){
+  evaluateResetPin();
+  delay(100);
+}
+evaluateResetPin(); // one more time, for the case, that button is released
 
 //EEPROM.get(0, settings);
 readSettings();
 readTallySettings();
 
+
 if(settings.uninitialized || tallySettings.uninitialized){
 
   Serial.println("initialize tally settings");
   // init settings
-  initSettings();
-  saveSettings();
-  saveTallySettings();
-  readSettings();
-  readTallySettings();
+  initializeAllSettings();
 
 } 
 
@@ -301,23 +362,6 @@ if(!LittleFS.begin(true)){
     return;
   }
   
-  /*
-  File file = LittleFS.open("/test.txt");
-  if(!file){
-    Serial.println("Failed to open file for reading");
-    return;
-  }
-  
-  //Serial.println("File Content:");
-  while(file.available()){
-    Serial.write(file.read());
-  }
-  file.close();
-  */
-
- 
-
-
 // Initialize SPI with custom pin configuration
   SPI1.begin(W5500_SCK, W5500_MISO, W5500_MOSI, W5500_CS);
 
@@ -341,8 +385,7 @@ if(!LittleFS.begin(true)){
   Serial.print("IP Address: ");
   Serial.println(Ethernet.localIP());
 
-  server.serveStatic("/assets", LittleFS, "/assets").setDefaultFile("test.txt");
-  server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
+
   
 
    server.on("/settings", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -434,7 +477,7 @@ if(!LittleFS.begin(true)){
 
     request->send(200, "text/plain", "success");
 
-    delay(100);
+    delay(500);
     ESP.restart();
   });
 
@@ -504,6 +547,14 @@ if(!LittleFS.begin(true)){
       request->send(200, "text/plain", "success");
    
     });
+
+    server.on("/*.gz",[](AsyncWebServerRequest *request) {
+
+      request->send(404, "text/plain", "NOT FOUND");
+   
+    });
+    server.serveStatic("/assets", LittleFS, "/assets").setDefaultFile("test.txt");
+    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
 
     // Websocket from here
 
@@ -616,6 +667,15 @@ void loopWebsocket(){
 
 
 void loop() {
+
+// Check Soft-Reset Button
+
+evaluateResetPin();
+if(!digitalRead(RESET_PIN) && RESET_BUTTON_AVAILABLE){
+  delay(100);
+  return;   // leave loop, if soft-reset button is presset
+}
+
 
 //Serial.println(state);
 
